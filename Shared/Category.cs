@@ -2,7 +2,7 @@
 
 namespace ApiPeliculas.Shared;
 
-public class Categoria
+public class Category
 {
     [Key]
     public Guid Id { get; set; }
