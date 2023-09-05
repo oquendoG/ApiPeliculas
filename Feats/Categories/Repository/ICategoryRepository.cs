@@ -1,6 +1,6 @@
 ﻿using ApiPeliculas.Shared;
 
-namespace ApiPeliculas.Data.Repository.Interfaces;
+namespace ApiPeliculas.Feats.Categories.Repository;
 
 public interface ICategoryRepository
 {

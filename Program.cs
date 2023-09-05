@@ -10,6 +10,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("connection"));
 });
 
+//agregamos servicios de extensión
+//Extensión services added
 builder.Services.AddAppServices();
 
 builder.Services.AddControllers();

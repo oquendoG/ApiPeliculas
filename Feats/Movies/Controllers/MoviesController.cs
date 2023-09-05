@@ -1,102 +1,107 @@
 ﻿using ApiPeliculas.Feats.Categories.DTOs;
 using ApiPeliculas.Feats.Categories.Repository;
+using ApiPeliculas.Feats.Movies.DTOs;
+using ApiPeliculas.Feats.Movies.Repository;
 using ApiPeliculas.Shared;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiPeliculas.Feats.Categories.Controllers;
+namespace ApiPeliculas.Feats.Movies.Controllers;
 
+[Route("api/Movies")]
 [ApiController]
-[Route("api/Categorias")]
-public class CategoriesController : ControllerBase
+public class MoviesController : ControllerBase
 {
-    private readonly ICategoryRepository categoryRepository;
+    private readonly IMovieRepository movieRepository;
 
-    public CategoriesController(ICategoryRepository categoryRepository)
+    public MoviesController(IMovieRepository movieRepository)
     {
-        this.categoryRepository = categoryRepository;
+        this.movieRepository = movieRepository;
     }
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCategories()
+    public async Task<IActionResult> GetMovies()
     {
-        ICollection<Category> categoriesDb =
-            await categoryRepository.GetCategories();
-        if (categoriesDb.Count == 0)
+        ICollection<Movie> moviesDb =
+            await movieRepository.GetMovies();
+
+        if (moviesDb.Count == 0)
         {
-            return NotFound("No hay categorías que mostrar");
+            return NotFound("No hay películas que mostrar");
         }
 
-        ICollection<CategoryDto> categories =
-            categoriesDb.Adapt<ICollection<CategoryDto>>();
+        ICollection<MovieDto> categories =
+            moviesDb.Adapt<ICollection<MovieDto>>();
 
         return Ok(categories);
     }
 
-    [HttpGet("{id:Guid}", Name = "categoria")]
+    [HttpGet("{id:Guid}", Name = "pelicula")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCategory(Guid id)
     {
-        Category? categoryDb =
-            await categoryRepository.GetCategoryById(id);
-        if (categoryDb is null)
+        Movie? movieDb =
+            await movieRepository.GetMovieById(id);
+
+        if (movieDb is null)
         {
             return NotFound(id);
         }
 
-        CategoryDto category =
-            categoryDb.Adapt<CategoryDto>();
+        MovieDto movie = movieDb.Adapt<MovieDto>();
 
-        return Ok(category);
+        return Ok(movie);
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto category)
+    public async Task<IActionResult> CreateMovie([FromBody] MovieDto movie)
     {
-        if (!ModelState.IsValid || category is null)
+        if (!ModelState.IsValid || movie is null)
         {
-            ModelState.AddModelError(string.Empty, "Revise que el nombre de la categoría");
+            ModelState.AddModelError(string.Empty, "Revise los campos");
             return BadRequest(ModelState);
         }
 
-        if (categoryRepository.CategoryExists(category.Name))
+        if (movieRepository.MovieExists(movie.Name))
         {
-            ModelState.AddModelError(string.Empty, "La categoría ya existe");
+            ModelState.AddModelError(string.Empty, "La película ya existe");
             return StatusCode(404, ModelState);
         }
 
-        Category categoryToBd = category.Adapt<Category>();
-        bool result = await categoryRepository.CreateCategory(categoryToBd);
+        Movie movieToBd = movie.Adapt<Movie>();
+        bool result = await movieRepository.CreateMovie(movieToBd);
         if (!result)
         {
             ModelState.AddModelError(string.Empty, "Ha habido un error y no se pudo guardar el registro por favor consulte con el adminsitrador del sistema");
             return StatusCode(500, ModelState);
         }
 
-        return CreatedAtRoute("categoria", new { id = categoryToBd.Id }, categoryToBd);
+        return CreatedAtRoute("pelicula", new { id = movieToBd.Id }, movieToBd);
     }
 
-    [HttpPatch("{id:Guid}", Name = "actualizarCategoria")]
+    [HttpPatch("{id:Guid}", Name = "actualizarPelicula")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> PatchCategory(Guid id, [FromBody] CategoryDto category)
+    public async Task<IActionResult> PatchMovie(Guid id, [FromBody] MovieDto movie)
     {
-        if (!ModelState.IsValid || category is null || id != category.Id)
+        if (!ModelState.IsValid || movie is null || id != movie.Id)
         {
             return BadRequest(ModelState);
         }
 
-        Category categoryToBd = category.Adapt<Category>();
-        bool result = await categoryRepository.UpdateCategory(categoryToBd);
+        Movie movieTobd = movie.Adapt<Movie>();
+        bool result = await movieRepository.UpdateMovie(movieTobd);
+
         if (!result)
         {
             ModelState.AddModelError(string.Empty, "Ha habido un error y no se pudo actualizar el registro por favor consulte con el adminsitrador del sistema");
@@ -106,23 +111,23 @@ public class CategoriesController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id:Guid}", Name = "borrarCategoria")]
+    [HttpDelete("{id:Guid}", Name = "borrarPelicula")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteCategory(Guid id)
+    public async Task<IActionResult> DeleteMovie(Guid id)
     {
-        if (!categoryRepository.CategoryExists(id))
+        if (!movieRepository.MovieExists(id))
         {
             return NotFound(id);
         }
 
-        Category? categoryToDelete = await categoryRepository.GetCategoryById(id);
+        Movie? movieToDelete = await movieRepository.GetMovieById(id);
         bool result = false;
-        if (categoryToDelete is not null)
+        if (movieToDelete is not null)
         {
-            result = await categoryRepository.DeleteCategory(categoryToDelete);
+            result = await movieRepository.DeleteMovie(movieToDelete);
         }
 
         if (!result)
