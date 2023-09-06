@@ -1,6 +1,4 @@
-﻿using ApiPeliculas.Feats.Categories.DTOs;
-using ApiPeliculas.Feats.Categories.Repository;
-using ApiPeliculas.Feats.Movies.DTOs;
+﻿using ApiPeliculas.Feats.Movies.DTOs;
 using ApiPeliculas.Feats.Movies.Repository;
 using ApiPeliculas.Shared;
 using Mapster;
@@ -8,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPeliculas.Feats.Movies.Controllers;
 
-[Route("api/Movies")]
 [ApiController]
+[Route("api/peliculas")]
 public class MoviesController : ControllerBase
 {
     private readonly IMovieRepository movieRepository;
@@ -137,5 +135,22 @@ public class MoviesController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpGet("ObtenerPeliculasEnCategoria/{categoriaId:Guid}")]
+    public async Task<IActionResult> GetMoviesinCategories(Guid categoriaId)
+    {
+        ICollection<Movie> moviesDb =
+            await movieRepository.GetMoviesInCategories(categoriaId);
+
+        if (moviesDb.Count == 0)
+        {
+            return NotFound("No hay películas que mostrar");
+        }
+
+        ICollection<MovieDto> categories =
+            moviesDb.Adapt<ICollection<MovieDto>>();
+
+        return Ok(categories);
     }
 }

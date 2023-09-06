@@ -12,6 +12,6 @@ public interface IMovieRepository
     Task<Movie?> GetMovieById(Guid id);
     Task<bool> Save();
     Task<bool> UpdateMovie(Movie movie);
-    ICollection<Movie> GetMoviesInCategories(Guid CategoryId);
-    ICollection<Movie> Search(string name);
+    Task<ICollection<Movie>> GetMoviesInCategories(Guid CategoryId);
+    Task<ICollection<Movie>> Search(string name);
 }

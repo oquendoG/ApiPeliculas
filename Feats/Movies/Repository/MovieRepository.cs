@@ -66,23 +66,23 @@ public class MovieRepository : IMovieRepository
                     cat.Id == id);
     }
 
-    public ICollection<Movie> GetMoviesInCategories(Guid CategoryId)
+    public async Task<ICollection<Movie>> GetMoviesInCategories(Guid CategoryId)
     {
-        return context.Movies.Include(ca => ca.Category)
+        return await context.Movies.Include(ca => ca.Category)
             .Where(ca => ca.CategoryId == CategoryId)
-            .ToList();
+            .ToListAsync();
     }
 
-    public ICollection<Movie> Search(string name)
+    public async Task<ICollection<Movie>> Search(string name)
     {
         IQueryable<Movie> movies = context.Movies;
         if (!String.IsNullOrEmpty(name))
         {
             movies = movies
-                .Where(e => e.Name.Contains(name) || e.Description.Contains(name));
+                .Where(movie => movie.Name.Contains(name) || movie.Description.Contains(name));
         }
 
-        return movies.ToList();
+        return await movies.ToListAsync();
     }
 
     public async Task<bool> Save()
