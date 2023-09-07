@@ -12,7 +12,7 @@ var logger = new LoggerConfiguration()
 	.CreateLogger();
 
 builder.Logging.ClearProviders();
-builder.Logging.AddSerilog();
+builder.Logging.AddSerilog(logger);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
