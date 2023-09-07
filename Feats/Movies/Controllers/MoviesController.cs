@@ -11,10 +11,12 @@ namespace ApiPeliculas.Feats.Movies.Controllers;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieRepository movieRepository;
+    private readonly ILogger<MoviesController> logger;
 
-    public MoviesController(IMovieRepository movieRepository)
+    public MoviesController(IMovieRepository movieRepository, ILogger<MoviesController> logger)
     {
         this.movieRepository = movieRepository;
+        this.logger = logger;
     }
 
     [HttpGet]
@@ -148,9 +150,34 @@ public class MoviesController : ControllerBase
             return NotFound("No hay películas que mostrar");
         }
 
-        ICollection<MovieDto> categories =
+        ICollection<MovieDto> movies =
             moviesDb.Adapt<ICollection<MovieDto>>();
 
-        return Ok(categories);
+        return Ok(movies);
+    }
+
+    [HttpGet("Buscar")]
+    public async Task<IActionResult> Search(string nombre)
+    {
+        try
+        {
+            ICollection<Movie> moviesDb =
+            await movieRepository.Search(nombre.Trim().ToLower());
+
+            if (!moviesDb.Any())
+            {
+                return NotFound("No hay películas que mostrar");
+            }
+
+            ICollection<MovieDto> movies =
+                moviesDb.Adapt<ICollection<MovieDto>>();
+
+            return Ok(movies);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Se ha producido una excepción al buscar la película");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error del servidor contacte al administrador");
+        }
     }
 }
