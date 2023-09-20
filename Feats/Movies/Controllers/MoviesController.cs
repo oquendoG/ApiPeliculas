@@ -2,6 +2,7 @@
 using ApiPeliculas.Feats.Movies.Repository;
 using ApiPeliculas.Shared;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPeliculas.Feats.Movies.Controllers;
@@ -20,6 +21,8 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "default")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMovies()
@@ -38,12 +41,14 @@ public class MoviesController : ControllerBase
         return Ok(categories);
     }
 
+    [AllowAnonymous]
     [HttpGet("{id:Guid}", Name = "pelicula")]
+    [ResponseCache(CacheProfileName = "default")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetCategory(Guid id)
+    public async Task<IActionResult> GetMovie(Guid id)
     {
         Movie? movieDb =
             await movieRepository.GetMovieById(id);
@@ -59,6 +64,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -88,9 +94,11 @@ public class MoviesController : ControllerBase
         return CreatedAtRoute("pelicula", new { id = movieToBd.Id }, movieToBd);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:Guid}", Name = "actualizarPelicula")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PatchMovie(Guid id, [FromBody] MovieDto movie)
     {
@@ -111,8 +119,10 @@ public class MoviesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:Guid}", Name = "borrarPelicula")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -139,8 +149,9 @@ public class MoviesController : ControllerBase
         return NoContent();
     }
 
+    [AllowAnonymous]
     [HttpGet("ObtenerPeliculasEnCategoria/{categoriaId:Guid}")]
-    public async Task<IActionResult> GetMoviesinCategories(Guid categoriaId)
+    public async Task<IActionResult> GetMoviesInCategories(Guid categoriaId)
     {
         ICollection<Movie> moviesDb =
             await movieRepository.GetMoviesInCategories(categoriaId);
@@ -156,6 +167,7 @@ public class MoviesController : ControllerBase
         return Ok(movies);
     }
 
+    [AllowAnonymous]
     [HttpGet("Buscar")]
     public async Task<IActionResult> Search(string nombre)
     {

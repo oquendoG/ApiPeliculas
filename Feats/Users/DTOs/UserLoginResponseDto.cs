@@ -7,6 +7,9 @@ namespace ApiPeliculas.Feats.Users.DTOs;
 /// </summary>
 public class UserLoginResponseDto
 {
-    public required User User { get; set; }
-    public string Token { get; set; }
+    public required User? User { get; set; }
+    public required string Token { get; set; }
+
+    public bool IsAuthenticated { get; set; } = false;
+    public string? Message { get; set; }
 }

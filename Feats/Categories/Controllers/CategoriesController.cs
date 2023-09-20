@@ -2,6 +2,7 @@
 using ApiPeliculas.Feats.Categories.Repository;
 using ApiPeliculas.Shared;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPeliculas.Feats.Categories.Controllers;
@@ -18,6 +19,8 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "default")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCategories()
@@ -35,6 +38,8 @@ public class CategoriesController : ControllerBase
         return Ok(categories);
     }
 
+    [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "default")]
     [HttpGet("{id:Guid}", Name = "categoria")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -56,8 +61,10 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto category)
     {
@@ -84,9 +91,11 @@ public class CategoriesController : ControllerBase
         return CreatedAtRoute("categoria", new { id = categoryToBd.Id }, categoryToBd);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:Guid}", Name = "actualizarCategoria")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PatchCategory(Guid id, [FromBody] CategoryDto category)
     {
@@ -106,8 +115,10 @@ public class CategoriesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:Guid}", Name = "borrarCategoria")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

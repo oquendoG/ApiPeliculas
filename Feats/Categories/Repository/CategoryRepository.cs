@@ -56,14 +56,16 @@ public class CategoryRepository : ICategoryRepository
 
     public bool CategoryExists(string name)
     {
-        return context.Categories.Any(cat =>
-                    cat.Name.ToLower().Trim() == name.ToLower().Trim());
+        return context.Categories
+            .AsNoTracking()
+            .Any(cat => cat.Name.ToLower().Trim() == name.ToLower().Trim());
     }
 
     public bool CategoryExists(Guid id)
     {
-        return context.Categories.Any(cat =>
-                    cat.Id == id);
+        return context.Categories
+            .AsNoTracking()
+            .Any(cat => cat.Id == id);
     }
 
     public async Task<bool> Save()

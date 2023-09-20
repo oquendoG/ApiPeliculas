@@ -15,7 +15,8 @@ public class MovieRepository : IMovieRepository
 
     public async Task<Movie?> GetMovieById(Guid id)
     {
-        return await context.Movies.AsNoTracking()
+        return await context.Movies
+                        .AsNoTracking()
                         .FirstOrDefaultAsync(cat => cat.Id == id);
     }
 
